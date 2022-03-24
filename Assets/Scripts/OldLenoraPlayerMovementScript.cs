@@ -15,26 +15,17 @@ public class OldLenoraPlayerMovementScript : MonoBehaviour
     [Header("Modifier rates")]
     [SerializeField] [Range(0.0f,1.0f)] float tuckMoveRate = 9f;
     [SerializeField] [Range(0.0f, 1.0f)] float crouchMoveRate = 6f;
-    [SerializeField] float hatTuckFallSpeedMultiplier = 2.0f;
     [SerializeField] float sprintSpeedMultiplier = 2.0f;
     [SerializeField] float sprintMaxSpeedMultiplier = 2.0f;
         
     [Header("Required Objects for the Script")]
     [SerializeField] Transform groundChecker;
-    [SerializeField] GameObject hat;
-    [SerializeField] GameObject body;
     [SerializeField] LayerMask groundMask;
     [SerializeField] GameObject bodyCollider;
     Vector3 bodyColliderPosOffset = new Vector3(0, -0.1f, 0);
-    [SerializeField] GameObject hatCollider;
-    Vector3 hatColliderRotationAmount = new Vector3(25,0,0);
-    Vector3 hatColliderPosOffset = new Vector3(0, -0.85f, 0);
 
 
-    // many of these will get removed once we have actual animations, but they can be good references for where they will be called
     float basePlayerScale = 1.0f;
-    [SerializeField] float tuckedHatScale = 0.6f;
-    float untuckedHatScale;
     [SerializeField] float crouchedScale = 0.4f;
 
     float currentAdditionalGravity;
@@ -42,8 +33,6 @@ public class OldLenoraPlayerMovementScript : MonoBehaviour
 
     [HideInInspector]
     public bool isPlayerGrounded;
-    [HideInInspector]
-    public bool isTucking = false;
     [HideInInspector]
     public bool isCrouching = false;
     bool isSprinting = false;
@@ -63,10 +52,7 @@ public class OldLenoraPlayerMovementScript : MonoBehaviour
 
         tuckMoveRate = tuckMoveRate * baseMaxMoveSpeed;
         crouchMoveRate = crouchMoveRate * baseMaxMoveSpeed;
-        hatTuckFallSpeedMultiplier =  hatTuckFallSpeedMultiplier * baseGravity;
 
-        untuckedHatScale = hat.transform.localScale.x;
-        tuckedHatScale = untuckedHatScale * tuckedHatScale;
         crouchedScale = basePlayerScale * crouchedScale;
         basePlayerScale = this.transform.localScale.y;
 
@@ -91,7 +77,6 @@ public class OldLenoraPlayerMovementScript : MonoBehaviour
             GetMovement();
 
             CrouchHandling();
-            TuckHandling();
         }
         else
         {
@@ -112,7 +97,7 @@ public class OldLenoraPlayerMovementScript : MonoBehaviour
 
 
     IEnumerator MakeSolid()
-    {d
+    {
         isAbleToJump = false;
         yield return new WaitForSeconds(0.3f);
         isAbleToJump = true;
@@ -122,12 +107,8 @@ void DoGravity()
     {
         isPlayerGrounded = Physics.CheckSphere(groundChecker.position, groundCheckDistance, groundMask);
 
-        if (isTucking && !isPlayerGrounded && rb.velocity.y < 0.0f) // make it slow only when they are falling
-        {
-            currentAdditionalGravity = hatTuckFallSpeedMultiplier;
-        }
-        else
-            currentAdditionalGravity = baseGravity;
+        
+        currentAdditionalGravity = baseGravity;
 
 
         //additional gravity
@@ -139,7 +120,7 @@ void DoGravity()
 
         totalMove.Set(0.0f, 0.0f, 0.0f);
 
-        isSprinting = (Input.GetKey(KeyCode.LeftShift) && isPlayerGrounded && !isTucking && !isCrouching);
+        isSprinting = (Input.GetKey(KeyCode.LeftShift) && isPlayerGrounded && !isCrouching);
 
         if (rb.velocity.magnitude < (currentMaxMoveSpeed * (isSprinting ? sprintMaxSpeedMultiplier:1.0f) ))
         {
@@ -179,7 +160,7 @@ void DoGravity()
     {
         if (Input.GetKey(KeyCode.Mouse1))
         {
-            if (!isCrouching && !isTucking && isPlayerGrounded) // you are not able to use any other action while tucking
+            if (!isCrouching && isPlayerGrounded)
             {
                 isCrouching = true;
 
@@ -191,14 +172,6 @@ void DoGravity()
 
                 bodyCollider.GetComponent<CapsuleCollider>().height *= crouchedScale;
                 bodyCollider.GetComponent<CapsuleCollider>().center += bodyColliderPosOffset;
-
-                hatCollider.transform.Rotate(hatColliderRotationAmount);
-                hatCollider.transform.position += hatColliderPosOffset;
-
-
-                //temp = hat.transform.localScale;
-                //temp.y /= crouchedScale;
-                //hat.transform.localScale = temp;
 
                 currentMaxMoveSpeed = crouchMoveRate;
             }
@@ -216,44 +189,6 @@ void DoGravity()
                 
                 bodyCollider.GetComponent<CapsuleCollider>().height /= crouchedScale;
                 bodyCollider.GetComponent<CapsuleCollider>().center -= bodyColliderPosOffset;
-
-
-                hatCollider.transform.Rotate(-hatColliderRotationAmount);
-                hatCollider.transform.position -= hatColliderPosOffset;
-
-                ////temp = hat.transform.localScale;
-                ////temp.y *= crouchedScale;
-                ////hat.transform.localScale = temp;
-
-                currentMaxMoveSpeed = baseMaxMoveSpeed;
-            }
-        }
-    }
-
-    void TuckHandling()
-    {
-
-
-        if (Input.GetKey(KeyCode.Mouse0))
-        {
-            if(!isTucking && !isCrouching)
-            {
-                isTucking = true;
-                Vector3 temp = hat.transform.localScale;
-                temp.z = temp.x = tuckedHatScale;
-                hat.transform.localScale = temp;
-
-                currentMaxMoveSpeed = tuckMoveRate;
-            }
-        }
-        else
-        {
-            if(isTucking)
-            {
-                isTucking = false;
-                Vector3 temp = hat.transform.localScale;
-                temp.z = temp.x = untuckedHatScale;
-                hat.transform.localScale = temp;
 
                 currentMaxMoveSpeed = baseMaxMoveSpeed;
             }

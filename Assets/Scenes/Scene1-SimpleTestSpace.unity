@@ -323,6 +323,7 @@ GameObject:
   - component: {fileID: 963194228}
   - component: {fileID: 963194227}
   - component: {fileID: 963194226}
+  - component: {fileID: 963194229}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -395,6 +396,27 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &963194229
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 963194225}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9e6b48273efdebb458d79c5b030165f0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  player: {fileID: 7462422728987478300}
+  cameraPositonOffset: {x: 0, y: 0.5, z: -3.5}
+  cameraAngleOffset: {x: -7.25, y: 0, z: 0}
+  cameraSpeed: 15
+  minPitch: -30
+  maxPitch: 30
+  cameraSensitivity: 2
+  closestCameraCanGetToPlayer: 2
+  extraPaddingBetweenCameraAndObject: 1
 --- !u!1 &2123469500
 GameObject:
   m_ObjectHideFlags: 0
@@ -407,7 +429,7 @@ GameObject:
   - component: {fileID: 2123469503}
   - component: {fileID: 2123469502}
   - component: {fileID: 2123469501}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Floor
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -679,27 +701,21 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   jumpHeight: 3
   baseMoveSpeed: 12
-  baseMaxMoveSpeed: 0
-  baseGravity: 0
+  baseMaxMoveSpeed: 20
+  baseGravity: 5
   groundCheckDistance: 0.4
-  playerTurningSpeedToCamera: 0
+  playerTurningSpeedToCamera: 4
   tuckMoveRate: 9
   crouchMoveRate: 6
-  hatTuckFallSpeedMultiplier: 2
   sprintSpeedMultiplier: 2
   sprintMaxSpeedMultiplier: 2
-  groundChecker: {fileID: 0}
-  hat: {fileID: 0}
-  body: {fileID: 0}
+  groundChecker: {fileID: 4749927207611661432}
   groundMask:
     serializedVersion: 2
-    m_Bits: 0
-  bodyCollider: {fileID: 0}
-  hatCollider: {fileID: 0}
-  tuckedHatScale: 0.6
+    m_Bits: 8
+  bodyCollider: {fileID: 7462422728987478300}
   crouchedScale: 0.4
   isPlayerGrounded: 0
-  isTucking: 0
   isCrouching: 0
   isJumping: 0
   isAutoMoving: 0
