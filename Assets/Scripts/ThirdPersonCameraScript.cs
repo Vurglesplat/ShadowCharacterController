@@ -7,6 +7,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 
 public class ThirdPersonCameraScript : MonoBehaviour
@@ -84,8 +85,9 @@ public class ThirdPersonCameraScript : MonoBehaviour
     void Follow(Transform leader)
     {
         float mx, my;
-        mx = Input.GetAxis("Mouse X");
-        my = Input.GetAxis("Mouse Y");
+        
+        mx = Mouse.current.position.x.ReadValue() - Mouse.current.position.x.ReadValueFromPreviousFrame();
+        my = Mouse.current.position.y.ReadValue() - Mouse.current.position.y.ReadValueFromPreviousFrame();
 
         // We apply the initial rotation to the camera.
         Quaternion initialRotation = Quaternion.Euler(cameraAngleOffset);
