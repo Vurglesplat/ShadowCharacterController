@@ -29,6 +29,7 @@ public class ThirdPersonCameraScript : MonoBehaviour
 
     bool isFollowing;
     float angleX = 0.0f;
+    float angleY = 0.0f;
 
     float normalZOffset;
     float normalYOffset;
@@ -86,23 +87,29 @@ public class ThirdPersonCameraScript : MonoBehaviour
     {
         float mx, my;
         
-        mx = Mouse.current.position.x.ReadValue() - Mouse.current.position.x.ReadValueFromPreviousFrame();
-        my = Mouse.current.position.y.ReadValue() - Mouse.current.position.y.ReadValueFromPreviousFrame();
+        if (Mouse.current.wasUpdatedThisFrame)
+        {
+            // I know I swapped x and y here, but personally, a horizontal x just makes more sense
+            my = Mouse.current.delta.x.ReadValue();
+            mx = Mouse.current.delta.y.ReadValue();
+            //mx = (Mouse.current.position.y.ReadValueFromPreviousFrame() - Mouse.current.position.y.ReadValue());
+            //my = (Mouse.current.position.x.ReadValueFromPreviousFrame() - Mouse.current.position.x.ReadValue());
 
-        // We apply the initial rotation to the camera.
-        Quaternion initialRotation = Quaternion.Euler(cameraAngleOffset);
+            // We apply the initial rotation to the camera.
+            Quaternion initialRotation = Quaternion.Euler(cameraAngleOffset);
 
-        Vector3 eu = transform.rotation.eulerAngles;
+            angleX -= mx * cameraSensitivity;
 
-        angleX -= my * cameraSensitivity;
+            // We clamp the angle along the X axis to be between the min and max pitch.
+            angleX = Mathf.Clamp(angleX, minPitch, maxPitch);
+            angleY += my * cameraSensitivity;
 
-        // We clamp the angle along the X axis to be between the min and max pitch.
-        angleX = Mathf.Clamp(angleX, minPitch, maxPitch);
+            angleY %= 360f;
 
-        eu.y += mx * cameraSensitivity;
-        Quaternion newRot = Quaternion.Euler(angleX, eu.y, 0.0f) * initialRotation;
+            Quaternion newRot = Quaternion.Euler(angleX, angleY, 0.0f) * initialRotation;
 
-        transform.rotation = newRot;
+            transform.rotation = newRot;
+        }
 
         Vector3 forward = transform.rotation * Vector3.forward;
         Vector3 right = transform.rotation * Vector3.right;
