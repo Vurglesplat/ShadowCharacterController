@@ -133,7 +133,7 @@ public class ThirdPersonCameraScript : MonoBehaviour
     {
         RaycastHit hit;
         //float sphereCastRad = 2.5f;
-        //float maxDistance = (transform.position - leader.position).magnitude;
+        float maxDistance = (transform.position - leader.position).magnitude;
         Vector3 direction = (transform.position - leader.position).normalized;
 
         Vector3 thisPositon = new Vector3(transform.position.x, transform.position.y, transform.position.z) ;
@@ -147,11 +147,10 @@ public class ThirdPersonCameraScript : MonoBehaviour
         //Debug.DrawRay(leader.position, (thisPositonDebug - leader.position) + padding, Color.red);
 
 
-        //if (Physics.SphereCast(leader.position, sphereCastRad, direction, out hit, maxDistance * 1.5f))
-
-        if(Physics.Linecast(leader.position, desiredPosition + padding,  out hit))
+        if (Physics.SphereCast(leader.position, 0.2f, direction, out hit, maxDistance * 1.5f))
+       // if (Physics.Linecast(leader.position, desiredPosition + padding,  out hit) && hit.collider.gameObject.layer != LayerMask.NameToLayer("Player"))
         {
-            //Debug.Log("Camera Hitting: " + hit.collider.gameObject);
+            Debug.Log("Camera Hitting: " + hit.collider.gameObject);
 
             Vector3 forward = transform.rotation * Vector3.forward;
             Vector3 right = transform.rotation * Vector3.right;

@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class OldLenoraPlayerMovementScript : MonoBehaviour
 {
@@ -13,11 +14,11 @@ public class OldLenoraPlayerMovementScript : MonoBehaviour
     [SerializeField] float playerTurningSpeedToCamera;
 
     [Header("Modifier rates")]
-    [SerializeField] [Range(0.0f,1.0f)] float tuckMoveRate = 9f;
+    [SerializeField] [Range(0.0f, 1.0f)] float tuckMoveRate = 9f;
     [SerializeField] [Range(0.0f, 1.0f)] float crouchMoveRate = 6f;
     [SerializeField] float sprintSpeedMultiplier = 2.0f;
     [SerializeField] float sprintMaxSpeedMultiplier = 2.0f;
-        
+
     [Header("Required Objects for the Script")]
     [SerializeField] Transform groundChecker;
     [SerializeField] LayerMask groundMask;
@@ -46,6 +47,15 @@ public class OldLenoraPlayerMovementScript : MonoBehaviour
 
     [HideInInspector] public bool isAutoMoving = false;
 
+    PlayerInput pInput;
+
+    InputAction moveAction;
+    InputAction lookAction;
+    InputAction jumpAction;
+    InputAction sprintAction;
+    InputAction crouchAction;
+    InputAction shadowSwapAction;
+
 
     private void Start()
     {
@@ -62,13 +72,24 @@ public class OldLenoraPlayerMovementScript : MonoBehaviour
         currentMaxMoveSpeed = baseMaxMoveSpeed;
 
         totalMove.Set(0.0f, 0.0f, 0.0f);
+
+
+        // Input setup
+        pInput = this.GetComponent<PlayerInput>();
+        moveAction = pInput.actions["Move"];
+        lookAction = pInput.actions["Look"];
+        jumpAction = pInput.actions["Jump"];
+        sprintAction = pInput.actions["Sprint"];
+        crouchAction = pInput.actions["Crouch"];
+        shadowSwapAction = pInput.actions["ShadowSwap"];
+
     }
 
     private void Update()
     {
         if(!isAutoMoving)
         {
-            if (Input.GetButtonDown("Jump") && isAbleToJump)
+            if (jumpAction.triggered && isAbleToJump)
             {
                 isJumping = true;
                 StartCoroutine("MakeSolid");
@@ -120,29 +141,34 @@ void DoGravity()
 
         totalMove.Set(0.0f, 0.0f, 0.0f);
 
-        isSprinting = (Input.GetKey(KeyCode.LeftShift) && isPlayerGrounded && !isCrouching);
+        isSprinting = (sprintAction.IsPressed() && isPlayerGrounded && !isCrouching);
 
         if (rb.velocity.magnitude < (currentMaxMoveSpeed * (isSprinting ? sprintMaxSpeedMultiplier:1.0f) ))
         {
-            if (Input.GetKey(KeyCode.W))
-            {
-                totalMove = rb.transform.forward;
-            }
+            Vector2 move = moveAction.ReadValue<Vector2>();
 
-            if (Input.GetKey(KeyCode.A))
-            {
-                totalMove += -rb.transform.right;
-            }
+            totalMove  = move.y * rb.transform.forward;
+            totalMove += move.x * rb.transform.right;
 
-            if (Input.GetKey(KeyCode.S))
-            {
-                totalMove += -rb.transform.forward;
-            }
+            //if (Input.GetKey(KeyCode.W))
+            //{
+            //    totalMove =  rb.transform.forward;
+            //}
 
-            if (Input.GetKey(KeyCode.D))
-            {
-                totalMove += rb.transform.right;
-            }
+            //if (Input.GetKey(KeyCode.A))
+            //{
+            //    totalMove += -rb.transform.right;
+            //}
+
+            //if (Input.GetKey(KeyCode.S))
+            //{
+            //    totalMove += -rb.transform.forward;
+            //}
+
+            //if (Input.GetKey(KeyCode.D))
+            //{
+            //    totalMove += rb.transform.right;
+            //}
         }
     }
 
@@ -158,7 +184,7 @@ void DoGravity()
 
     void CrouchHandling()
     {
-        if (Input.GetKey(KeyCode.Mouse1))
+        if (crouchAction.IsPressed())
         {
             if (!isCrouching && isPlayerGrounded)
             {
@@ -197,14 +223,28 @@ void DoGravity()
 
     void FaceCamera()
     {
-        float h = Input.GetAxis("Horizontal");
-        float v = Input.GetAxis("Vertical");
+        Vector2 lookAxes = lookAction.ReadValue<Vector2>();
+
+
+
+        float horizontal = lookAxes.x;
+        float vertical   = lookAxes.y;
+
+        //old
+
+
+        // eally old
+        //float h = Input.GetAxis("Horizontal");
+        //float v = Input.GetAxis("Vertical");
+
+
         // Only allow aligning of player's direction when there is a movement.
-        if (v > 0.1 || v < -0.1 || h > 0.1 || h < -0.1)
+        if (vertical > 0.1 || vertical < -0.1 || horizontal > 0.1 || horizontal < -0.1)
         {
+
             // rotate player towards the camera forward.
             Vector3 eu = Camera.main.transform.rotation.eulerAngles;
-            transform.rotation = Quaternion.RotateTowards(
+            this.transform.rotation = Quaternion.RotateTowards(
                 transform.rotation,
                 Quaternion.Euler(0.0f, eu.y, 0.0f),
                 playerTurningSpeedToCamera * Time.deltaTime);
