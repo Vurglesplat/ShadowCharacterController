@@ -27,7 +27,9 @@ public class ThirdPersonCameraScript : MonoBehaviour
     public float closestCameraCanGetToPlayer;
     public float extraPaddingBetweenCameraAndObject;
 
-    bool isFollowing;
+    bool isFollowingPlayer;
+
+
     float angleX = 0.0f;
     float angleY = 0.0f;
 
@@ -40,7 +42,7 @@ public class ThirdPersonCameraScript : MonoBehaviour
 
     void Start()
     {
-        isFollowing = true;
+        isFollowingPlayer = true;
 
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
@@ -69,18 +71,18 @@ public class ThirdPersonCameraScript : MonoBehaviour
 
     void ChangeCameraFollowStatus(bool newStatus)
     {
-        isFollowing = newStatus;
+        isFollowingPlayer = newStatus;
     }
 
     private void LateUpdate()
     {
-        if(isFollowing)
+        if(isFollowingPlayer)
             Follow(player.transform);
     }
 
     void StopFollowingPlayer()
     {
-        isFollowing = false;
+        isFollowingPlayer = false;
     }
 
     void Follow(Transform leader)

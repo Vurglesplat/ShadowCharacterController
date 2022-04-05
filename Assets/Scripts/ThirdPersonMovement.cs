@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class OldLenoraPlayerMovementScript : MonoBehaviour
+public class ThirdPersonMovement : MonoBehaviour
 {
     [Header("Base Stats")]
     [SerializeField] float jumpHeight = 3f;
@@ -54,7 +54,6 @@ public class OldLenoraPlayerMovementScript : MonoBehaviour
     InputAction jumpAction;
     InputAction sprintAction;
     InputAction crouchAction;
-    InputAction shadowSwapAction;
 
 
     private void Start()
@@ -81,7 +80,6 @@ public class OldLenoraPlayerMovementScript : MonoBehaviour
         jumpAction = pInput.actions["Jump"];
         sprintAction = pInput.actions["Sprint"];
         crouchAction = pInput.actions["Crouch"];
-        shadowSwapAction = pInput.actions["ShadowSwap"];
 
     }
 
