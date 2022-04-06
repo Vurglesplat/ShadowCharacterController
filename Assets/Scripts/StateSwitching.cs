@@ -26,27 +26,49 @@ public class StateSwitching : MonoBehaviour
     {
         isShadowForm = false;
         
-        
-        
+
+
         PlayerInput pInput = this.GetComponent<PlayerInput>();
         shadowSwapAction = pInput.actions["ShadowSwap"];
     }
 
     void Update()
     {
-        if (shadowSwapAction.IsPressed())
+        if (isShadowForm)
         {
-            foreach(Material mat in playerRenderer.materials)
-            {
-                mat.SetFloat("_amountConvertedToShadow", 1.0f);
-            }
+            ShadowFormUpdate();
         }
         else
         {
-            foreach (Material mat in playerRenderer.materials)
-            {
-                mat.SetFloat("_amountConvertedToShadow", 0.0f);
-            }
+            StandardFormUpdate();
+        }
+    }
+
+    void ShadowFormUpdate()
+    {
+        if (!shadowSwapAction.IsPressed())
+        {
+            isShadowForm = false;
+        }
+
+        SetAllMatShadowVal(1.0f);
+    }
+
+    void StandardFormUpdate()
+    {
+        if (shadowSwapAction.IsPressed())
+        {
+            isShadowForm = true;
+        }
+
+        SetAllMatShadowVal(0.0f);
+    }
+
+    public void SetAllMatShadowVal(float newShadowAmount)
+    {
+        foreach (Material mat in playerRenderer.materials)
+        {
+            mat.SetFloat("_amountConvertedToShadow", newShadowAmount);
         }
     }
 }
