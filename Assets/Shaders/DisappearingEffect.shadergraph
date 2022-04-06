@@ -620,7 +620,7 @@
     "overrideHLSLDeclaration": false,
     "hlslDeclarationOverride": 0,
     "m_Hidden": false,
-    "m_Value": 0.0,
+    "m_Value": 0.6700000166893005,
     "m_FloatType": 1,
     "m_RangeValues": {
         "x": 0.0,
@@ -840,7 +840,7 @@
     "m_ShaderOutputName": "A",
     "m_StageCapability": 3,
     "m_Value": {
-        "x": -2.0,
+        "x": -1.0,
         "y": 0.0,
         "z": 0.0,
         "w": 0.0

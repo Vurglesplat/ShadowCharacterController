@@ -1791,15 +1791,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bbd9e13f63cd6a541bd30bf959e21c36, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  jumpHeight: 3
-  baseMoveSpeed: 10
-  baseMaxMoveSpeed: 15
+  jumpHeight: 300
+  baseMoveSpeed: 8
+  baseMaxMoveSpeed: 8
   baseGravity: 0.5
   groundCheckDistance: 0.4
   playerTurningSpeedToCamera: 500
   crouchMoveRate: 0.7
-  sprintSpeedMultiplier: 1.25
-  sprintMaxSpeedMultiplier: 2
+  sprintSpeedMultiplier: 1.2
+  sprintMaxSpeedMultiplier: 1.5
   groundChecker: {fileID: 1996912918}
   groundMask:
     serializedVersion: 2
@@ -1936,8 +1936,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c6a3b8d63eb08724f96343df39055809, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  currentShadowAmount: 0
   isShadowForm: 0
+  currentShadowAmount: 0
   timeToSwitchToShadow: 2
   playerRenderer: {fileID: 5855375670351758362}
 --- !u!1 &2462311229301504434
@@ -3275,7 +3275,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7215451597959157702}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 1, z: -10}
+  m_LocalPosition: {x: 0, y: 1.5, z: -2.25}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
