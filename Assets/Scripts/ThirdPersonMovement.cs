@@ -3,6 +3,12 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
+////////////////////////////////////////////////////////////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+/////This script was first made by Brandon Boras (bb), any assisstance or workf from others will be shown via comment\\\
+/////Unless the code was marked as belonging to someone other than bb else, it is free to use.\\\\\\\\\\\\\\\\\\\\\\\\\\ 
+////////////////////////////////////////////////////////////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+
+
 public class ThirdPersonMovement : MonoBehaviour
 {
     [Header("Base Stats")]
@@ -14,7 +20,6 @@ public class ThirdPersonMovement : MonoBehaviour
     [SerializeField] float playerTurningSpeedToCamera;
 
     [Header("Modifier rates")]
-    [SerializeField] [Range(0.0f, 1.0f)] float tuckMoveRate = 9f;
     [SerializeField] [Range(0.0f, 1.0f)] float crouchMoveRate = 6f;
     [SerializeField] float sprintSpeedMultiplier = 2.0f;
     [SerializeField] float sprintMaxSpeedMultiplier = 2.0f;
@@ -58,8 +63,6 @@ public class ThirdPersonMovement : MonoBehaviour
 
     private void Start()
     {
-
-        tuckMoveRate = tuckMoveRate * baseMaxMoveSpeed;
         crouchMoveRate = crouchMoveRate * baseMaxMoveSpeed;
 
         crouchedScale = basePlayerScale * crouchedScale;
@@ -225,26 +228,28 @@ void DoGravity()
 
 
 
-        float horizontal = lookAxes.x;
-        float vertical   = lookAxes.y;
+        float horizontal = totalMove.x;
+        float vertical   = totalMove.y;
+       
+        //float horizontal = lookAxes.x;
+        //float vertical   = lookAxes.y;
 
         //old
 
 
-        // eally old
+        // really old
         //float h = Input.GetAxis("Horizontal");
         //float v = Input.GetAxis("Vertical");
 
 
         // Only allow aligning of player's direction when there is a movement.
-        if (vertical > 0.1 || vertical < -0.1 || horizontal > 0.1 || horizontal < -0.1)
+        if (totalMove.magnitude > 0f)
         {
-
             // rotate player towards the camera forward.
             Vector3 eu = Camera.main.transform.rotation.eulerAngles;
             this.transform.rotation = Quaternion.RotateTowards(
                 transform.rotation,
-                Quaternion.Euler(0.0f, eu.y, 0.0f),
+                Quaternion.Euler(transform.rotation.x, eu.y, transform.rotation.y),
                 playerTurningSpeedToCamera * Time.deltaTime);
         }
     }

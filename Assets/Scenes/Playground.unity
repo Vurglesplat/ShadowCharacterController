@@ -1788,19 +1788,18 @@ MonoBehaviour:
   m_GameObject: {fileID: 2423669496611868142}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c221045302e433b44b4dc6f675d3fad1, type: 3}
+  m_Script: {fileID: 11500000, guid: bbd9e13f63cd6a541bd30bf959e21c36, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   jumpHeight: 3
-  baseMoveSpeed: 9
-  baseMaxMoveSpeed: 13
-  baseGravity: 0.2
-  groundCheckDistance: 0.2
-  playerTurningSpeedToCamera: 300
-  tuckMoveRate: 0.88
-  crouchMoveRate: 0.735
+  baseMoveSpeed: 10
+  baseMaxMoveSpeed: 15
+  baseGravity: 0.5
+  groundCheckDistance: 0.4
+  playerTurningSpeedToCamera: 500
+  crouchMoveRate: 0.7
   sprintSpeedMultiplier: 1.25
-  sprintMaxSpeedMultiplier: 1.5
+  sprintMaxSpeedMultiplier: 2
   groundChecker: {fileID: 1996912918}
   groundMask:
     serializedVersion: 2
@@ -3259,6 +3258,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   player: {fileID: 2423669496611868142}
+  shouldMoveCameraInEditorAsWell: 1
   cameraPositonOffset: {x: 0, y: 1.5, z: -2.25}
   cameraAngleOffset: {x: 0, y: 0, z: 0}
   cameraSpeed: 10

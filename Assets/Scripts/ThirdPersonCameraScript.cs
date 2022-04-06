@@ -1,19 +1,28 @@
 ﻿
-/*
- * using https://faramira.com/a-configurable-third-person-camera-in-unity/ as a base for the third person camera movement
- * 
- */
 
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEditor;
 
 
+////////////////////////////////////////////////////////////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+/////This script was first made by Brandon Boras (bb), any assisstance or workf from others will be shown via comment\\\
+/////Unless the code was marked as belonging to someone other than bb else, it is free to use.\\\\\\\\\\\\\\\\\\\\\\\\\\ 
+////////////////////////////////////////////////////////////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+
+
+
+/*
+ * using https://faramira.com/a-configurable-third-person-camera-in-unity/ as a base for the third person camera movement
+ * 
+ */
 public class ThirdPersonCameraScript : MonoBehaviour
 {
     public GameObject player;
     [Header("General Camera Vars")]
+    [SerializeField] bool shouldMoveCameraInEditorAsWell;
     public Vector3 cameraPositonOffset;
     public Vector3 cameraAngleOffset = new Vector3(0.0f, 0.0f, 0.0f);
 
@@ -76,7 +85,7 @@ public class ThirdPersonCameraScript : MonoBehaviour
 
     private void LateUpdate()
     {
-        if(isFollowingPlayer)
+        if (isFollowingPlayer)
             Follow(player.transform);
     }
 
@@ -88,7 +97,7 @@ public class ThirdPersonCameraScript : MonoBehaviour
     void Follow(Transform leader)
     {
         float mx, my;
-        
+
         if (Mouse.current.wasUpdatedThisFrame)
         {
             // I know I swapped x and y here, but personally, a horizontal x just makes more sense
@@ -138,9 +147,9 @@ public class ThirdPersonCameraScript : MonoBehaviour
         float maxDistance = (transform.position - leader.position).magnitude;
         Vector3 direction = (transform.position - leader.position).normalized;
 
-        Vector3 thisPositon = new Vector3(transform.position.x, transform.position.y, transform.position.z) ;
-        
-        Vector3 thisPositonDebug = new Vector3(transform.position.x, transform.position.y - 1.0f, transform.position.z) ;
+        Vector3 thisPositon = new Vector3(transform.position.x, transform.position.y, transform.position.z);
+
+        Vector3 thisPositonDebug = new Vector3(transform.position.x, transform.position.y - 1.0f, transform.position.z);
 
         Vector3 padding = direction * extraPaddingBetweenCameraAndObject;
 
@@ -150,7 +159,7 @@ public class ThirdPersonCameraScript : MonoBehaviour
 
 
         if (Physics.SphereCast(leader.position, 0.2f, direction, out hit, maxDistance * 1.5f))
-       // if (Physics.Linecast(leader.position, desiredPosition + padding,  out hit) && hit.collider.gameObject.layer != LayerMask.NameToLayer("Player"))
+        // if (Physics.Linecast(leader.position, desiredPosition + padding,  out hit) && hit.collider.gameObject.layer != LayerMask.NameToLayer("Player"))
         {
             Debug.Log("Camera Hitting: " + hit.collider.gameObject);
 
@@ -162,7 +171,7 @@ public class ThirdPersonCameraScript : MonoBehaviour
 
             float distanceFromPlayer;
             //Debug.Log("" + Mathf.Clamp(hit.distance - extraPaddingBetweenCameraAndObject, closestCameraCanGetToPlayer, maxDistance));
-                distanceFromPlayer = Mathf.Clamp(hit.distance - extraPaddingBetweenCameraAndObject, closestCameraCanGetToPlayer, hit.distance);
+            distanceFromPlayer = Mathf.Clamp(hit.distance - extraPaddingBetweenCameraAndObject, closestCameraCanGetToPlayer, hit.distance);
             //Debug.Log("hitdistance = " + hit.distance);
             Vector3 newDesiredPosition = targetPos
                 + forward * -(float)System.Math.Round(distanceFromPlayer, 3)
@@ -226,5 +235,26 @@ public class ThirdPersonCameraScript : MonoBehaviour
         }
 
         cameraPositonOffset = goalOffset;
+    }
+
+
+
+    [CustomEditor(typeof(ThirdPersonCameraScript)), CanEditMultipleObjects]
+
+    public class ThirdPersonCameraScriptEditor : Editor
+    {
+
+
+        public override void OnInspectorGUI()
+        {
+            DrawDefaultInspector();
+
+            ThirdPersonCameraScript script = (ThirdPersonCameraScript)target;
+
+            if (script.shouldMoveCameraInEditorAsWell)
+            {
+                script.Follow(script.player.transform);
+            }
+        }
     }
 }
