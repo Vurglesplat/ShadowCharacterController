@@ -11,6 +11,16 @@ using UnityEngine.InputSystem;
 
 public class StateSwitching : MonoBehaviour
 {
+    [SerializeField] ThirdPersonCameraScript cameraScript;
+    [SerializeField] ThirdPersonMovement standardMovement;
+    [SerializeField] ShadowMovment shadowMovement;
+    [Space]
+    [SerializeField] GameObject standardModel;
+    [SerializeField] GameObject shadowModel;
+    [Space]
+    [SerializeField] GameObject standardCollider;
+    [SerializeField] GameObject shadowCollider;
+    
     [Header("Variables to follow along to")]
     public bool isShadowForm;
     [Range(0, 1)] public float currentShadowAmount;
@@ -24,12 +34,14 @@ public class StateSwitching : MonoBehaviour
 
     private void Start()
     {
-        isShadowForm = false;
+
         currentShadowAmount = 0;
         isWaitingToReleaseSwapButton = false;
 
         PlayerInput pInput = this.GetComponent<PlayerInput>();
         shadowSwapAction = pInput.actions["ShadowSwap"];
+
+        ChangeToShadowForm(false);
     }
 
     void Update()
@@ -81,15 +93,29 @@ public class StateSwitching : MonoBehaviour
             mat.SetFloat("_amountConvertedToShadow", newShadowAmount);
         }
     }
+
+    public void SetAllMatTransparencyUpValue(bool isTransparencyMovingUp)
+    {
+        foreach (Material mat in playerRenderer.materials)
+        {
+            mat.SetFloat("_transparencyMovesUp", isTransparencyMovingUp? 1f : 0f);
+        }
+        
+    }
+
     public void HandleSwitching(bool isStartingFromStandardForm, bool isConvertingToShadow)
     {
+        // enable this when I want to work on it again
+
+        //SetAllMatTransparencyUpValue(!isStartingFromStandardForm);
+
         if (isConvertingToShadow)
         {
             currentShadowAmount += Time.deltaTime / timeToSwitchToShadow ;
 
             if (currentShadowAmount > 1)
             {
-                isShadowForm = true;
+                ChangeToShadowForm(true);
                 isWaitingToReleaseSwapButton = true;
                 currentShadowAmount = 1;
             }
@@ -104,12 +130,46 @@ public class StateSwitching : MonoBehaviour
 
             if (currentShadowAmount < 0)
             {
-                isShadowForm = false;
+                ChangeToShadowForm(false);
                 isWaitingToReleaseSwapButton = true;
                 currentShadowAmount = 0;
             }
 
             SetAllMatShadowVal(currentShadowAmount);
+        }
+    }
+
+    void ChangeToShadowForm(bool toShadow)
+    {
+        isShadowForm = toShadow;
+
+        if (isShadowForm)
+        {
+            // call camera script here
+            cameraScript.ChangeCameraMode(true);
+
+            shadowMovement.enabled = true;
+            standardMovement.enabled = false;
+
+            standardModel.SetActive(false);
+            shadowModel.SetActive(true);
+
+            standardCollider.SetActive(false);
+            shadowCollider.SetActive(true);
+        }
+        else
+        {
+            // call camera script here
+            cameraScript.ChangeCameraMode(false);
+
+            shadowMovement.enabled = false;
+            standardMovement.enabled = true;
+
+            shadowModel.SetActive(false);
+            standardModel.SetActive(true);
+
+            shadowCollider.SetActive(false);
+            standardCollider.SetActive(true);
         }
     }
 }

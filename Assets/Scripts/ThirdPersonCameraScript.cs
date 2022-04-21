@@ -18,26 +18,47 @@ using UnityEditor;
  * using https://faramira.com/a-configurable-third-person-camera-in-unity/ as a base for the third person camera movement
  * 
  */
+
+//
+// TODO
+// - Make the collections of vars a serializable struct or something
+// - Finish the function ChangeCameraVars
+
 public class ThirdPersonCameraScript : MonoBehaviour
 {
+    [System.Serializable]
+    class CameraData
+    {
+        public Vector3 cameraPositonOffset;
+        public Vector3 cameraAngleOffset = new Vector3(0.0f, 0.0f, 0.0f);
+
+        public float cameraSpeed;
+
+        public float minPitch = -30.0f;
+        public float maxPitch = 30.0f;
+        public float cameraSensitivity = 5.0f;
+    }
+
     public GameObject player;
-    [Header("General Camera Vars")]
     [SerializeField] bool shouldMoveCameraInEditorAsWell;
-    public Vector3 cameraPositonOffset;
-    public Vector3 cameraAngleOffset = new Vector3(0.0f, 0.0f, 0.0f);
 
-    public float cameraSpeed;
 
-    public float minPitch = -30.0f;
-    public float maxPitch = 30.0f;
-    public float cameraSensitivity = 5.0f;
+    [SerializeField] CameraData standardCameraVars;
+
+    [SerializeField] CameraData shadowCameraVars;
+
+
+    [Space]
+    [Space]
+
+    CameraData currentData;
 
     [Header("Camera Collision Vars")]
     public float closestCameraCanGetToPlayer;
     public float extraPaddingBetweenCameraAndObject;
 
     bool isFollowingPlayer;
-
+    bool canMouseMoveCamera = true;
 
     float angleX = 0.0f;
     float angleY = 0.0f;
@@ -51,13 +72,15 @@ public class ThirdPersonCameraScript : MonoBehaviour
 
     void Start()
     {
+        ChangeCameraMode(false);
+
         isFollowingPlayer = true;
 
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
 
-        normalZOffset = cameraPositonOffset.z;
-        normalYOffset = cameraPositonOffset.y;
+        normalZOffset = currentData.cameraPositonOffset.z;
+        normalYOffset = currentData.cameraPositonOffset.y;
         zoomedZOffset = normalZOffset / 3.0f;
         zoomedYOffset = normalYOffset / 3.0f;
     }
@@ -78,17 +101,15 @@ public class ThirdPersonCameraScript : MonoBehaviour
     }
 
 
-    void ChangeCameraFollowStatus(bool newStatus)
-    {
-        isFollowingPlayer = newStatus;
-    }
-
     private void LateUpdate()
     {
         if (isFollowingPlayer)
             Follow(player.transform);
     }
-
+    void ChangeCameraFollowStatus(bool newStatus)
+    {
+        isFollowingPlayer = newStatus;
+    }
     void StopFollowingPlayer()
     {
         isFollowingPlayer = false;
@@ -98,7 +119,7 @@ public class ThirdPersonCameraScript : MonoBehaviour
     {
         float mx, my;
 
-        if (Mouse.current.wasUpdatedThisFrame)
+        if (canMouseMoveCamera && Mouse.current.wasUpdatedThisFrame)
         {
             // I know I swapped x and y here, but personally, a horizontal x just makes more sense
             my = Mouse.current.delta.x.ReadValue();
@@ -107,36 +128,61 @@ public class ThirdPersonCameraScript : MonoBehaviour
             //my = (Mouse.current.position.x.ReadValueFromPreviousFrame() - Mouse.current.position.x.ReadValue());
 
             // We apply the initial rotation to the camera.
-            Quaternion initialRotation = Quaternion.Euler(cameraAngleOffset);
+            Quaternion initialRotation = Quaternion.Euler(currentData.cameraAngleOffset);
 
-            angleX -= mx * cameraSensitivity;
+            angleX -= mx * currentData.cameraSensitivity;
 
             // We clamp the angle along the X axis to be between the min and max pitch.
-            angleX = Mathf.Clamp(angleX, minPitch, maxPitch);
-            angleY += my * cameraSensitivity;
+            angleX = Mathf.Clamp(angleX, currentData.minPitch, currentData.maxPitch);
+            angleY += my * currentData.cameraSensitivity;
 
             angleY %= 360f;
 
             Quaternion newRot = Quaternion.Euler(angleX, angleY, 0.0f) * initialRotation;
 
             transform.rotation = newRot;
+
+
+            Vector3 forward = transform.rotation * Vector3.forward;
+            Vector3 right = transform.rotation * Vector3.right;
+            Vector3 up = transform.rotation * Vector3.up;
+
+            Vector3 desiredPosition = leader.position
+                + forward * currentData.cameraPositonOffset.z
+                + right * currentData.cameraPositonOffset.x
+                + up * currentData.cameraPositonOffset.y;
+
+            desiredPosition = AvoidWallCollision(leader, desiredPosition);
+
+
+            Vector3 position = Vector3.Lerp(transform.position, desiredPosition,
+                Time.deltaTime * currentData.cameraSpeed);
+            transform.position = position;
+        }
+        else
+        {
+            Vector3 forward = transform.rotation * Vector3.forward;
+            Vector3 right = transform.rotation * Vector3.right;
+            Vector3 up = transform.rotation * Vector3.up;
+
+            Vector3 desiredPosition = leader.position
+                + forward * currentData.cameraPositonOffset.z
+                + right * currentData.cameraPositonOffset.x
+                + up * currentData.cameraPositonOffset.y;
+
+            desiredPosition = AvoidWallCollision(leader, desiredPosition);
+
+
+            Vector3 position = Vector3.Lerp(transform.position, desiredPosition,
+                Time.deltaTime * currentData.cameraSpeed);
+            transform.position = position;
+
+
+
+            transform.rotation = Quaternion.Euler(currentData.cameraAngleOffset);
         }
 
-        Vector3 forward = transform.rotation * Vector3.forward;
-        Vector3 right = transform.rotation * Vector3.right;
-        Vector3 up = transform.rotation * Vector3.up;
-
-        Vector3 desiredPosition = leader.position
-            + forward * cameraPositonOffset.z
-            + right * cameraPositonOffset.x
-            + up * cameraPositonOffset.y;
-
-        desiredPosition = AvoidWallCollision(leader, desiredPosition);
-
-
-        Vector3 position = Vector3.Lerp(transform.position, desiredPosition,
-            Time.deltaTime * cameraSpeed);
-        transform.position = position;
+        
 
     }
 
@@ -175,8 +221,8 @@ public class ThirdPersonCameraScript : MonoBehaviour
             //Debug.Log("hitdistance = " + hit.distance);
             Vector3 newDesiredPosition = targetPos
                 + forward * -(float)System.Math.Round(distanceFromPlayer, 3)
-                + right * cameraPositonOffset.x
-                + up * cameraPositonOffset.y;
+                + right * currentData.cameraPositonOffset.x
+                + up * currentData.cameraPositonOffset.y;
 
 
             //Debug.DrawRay(leader.position, (thisPositon - leader.position) + padding, Color.cyan);
@@ -203,58 +249,53 @@ public class ThirdPersonCameraScript : MonoBehaviour
     {
         float currentTime = 0;
 
-        Vector3 startingOffset = cameraPositonOffset;
-        Vector3 goalOffset = cameraPositonOffset;
+        Vector3 startingOffset = currentData.cameraPositonOffset;
+        Vector3 goalOffset = currentData.cameraPositonOffset;
         goalOffset.z = zoomedZOffset;
         goalOffset.y = zoomedYOffset;
 
         while (currentTime < TIME_TO_ZOOM_IN_AND_OUT)
         {
-            cameraPositonOffset = Vector3.Lerp(startingOffset, goalOffset, currentTime / TIME_TO_ZOOM_IN_AND_OUT);
+            currentData.cameraPositonOffset = Vector3.Lerp(startingOffset, goalOffset, currentTime / TIME_TO_ZOOM_IN_AND_OUT);
             currentTime += Time.deltaTime;
             yield return null;
         }
 
-        cameraPositonOffset = goalOffset;
+        currentData.cameraPositonOffset = goalOffset;
     }
 
     IEnumerator ZoomOut()
     {
         float currentTime = 0;
 
-        Vector3 startingOffset = cameraPositonOffset;
-        Vector3 goalOffset = cameraPositonOffset;
+        Vector3 startingOffset = currentData.cameraPositonOffset;
+        Vector3 goalOffset = currentData.cameraPositonOffset;
         goalOffset.z = normalZOffset;
         goalOffset.y = normalYOffset;
 
         while (currentTime < TIME_TO_ZOOM_IN_AND_OUT)
         {
-            cameraPositonOffset = Vector3.Lerp(startingOffset, goalOffset, currentTime / TIME_TO_ZOOM_IN_AND_OUT);
+            currentData.    cameraPositonOffset = Vector3.Lerp(startingOffset, goalOffset, currentTime / TIME_TO_ZOOM_IN_AND_OUT);
             currentTime += Time.deltaTime;
             yield return null;
         }
 
-        cameraPositonOffset = goalOffset;
+        currentData.cameraPositonOffset = goalOffset;
     }
 
-
-
-    [CustomEditor(typeof(ThirdPersonCameraScript)), CanEditMultipleObjects]
-
-    public class ThirdPersonCameraScriptEditor : Editor
+    public void ChangeCameraMode(bool changingToShadowForm)
     {
-
-
-        public override void OnInspectorGUI()
+        if(changingToShadowForm)
         {
-            DrawDefaultInspector();
-
-            ThirdPersonCameraScript script = (ThirdPersonCameraScript)target;
-
-            if (script.shouldMoveCameraInEditorAsWell)
-            {
-                script.Follow(script.player.transform);
-            }
+            currentData = shadowCameraVars;
+            canMouseMoveCamera = false;
+        }
+        else
+        {
+            currentData = standardCameraVars;
+            canMouseMoveCamera = true;
         }
     }
+
+
 }
