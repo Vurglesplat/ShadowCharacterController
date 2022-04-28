@@ -40,7 +40,6 @@ public class ThirdPersonCameraScript : MonoBehaviour
     }
 
     public GameObject player;
-    [SerializeField] bool shouldMoveCameraInEditorAsWell;
 
 
     [SerializeField] CameraData standardCameraVars;
@@ -142,47 +141,36 @@ public class ThirdPersonCameraScript : MonoBehaviour
 
             transform.rotation = newRot;
 
-
-            Vector3 forward = transform.rotation * Vector3.forward;
-            Vector3 right = transform.rotation * Vector3.right;
-            Vector3 up = transform.rotation * Vector3.up;
-
-            Vector3 desiredPosition = leader.position
-                + forward * currentData.cameraPositonOffset.z
-                + right * currentData.cameraPositonOffset.x
-                + up * currentData.cameraPositonOffset.y;
-
-            desiredPosition = AvoidWallCollision(leader, desiredPosition);
-
-
-            Vector3 position = Vector3.Lerp(transform.position, desiredPosition,
-                Time.deltaTime * currentData.cameraSpeed);
-            transform.position = position;
+            CalculatePosition(leader);
         }
-        else
+        else // shadow camera controls
         {
-            Vector3 forward = transform.rotation * Vector3.forward;
-            Vector3 right = transform.rotation * Vector3.right;
-            Vector3 up = transform.rotation * Vector3.up;
-
-            Vector3 desiredPosition = leader.position
-                + forward * currentData.cameraPositonOffset.z
-                + right * currentData.cameraPositonOffset.x
-                + up * currentData.cameraPositonOffset.y;
-
-            desiredPosition = AvoidWallCollision(leader, desiredPosition);
-
-
-            Vector3 position = Vector3.Lerp(transform.position, desiredPosition,
-                Time.deltaTime * currentData.cameraSpeed);
-            transform.position = position;
-
-
+            CalculatePosition(leader);
 
             transform.rotation = Quaternion.Euler(currentData.cameraAngleOffset);
         }
 
         
+
+    }
+
+    void CalculatePosition(Transform leader)
+    {
+        Vector3 forward = transform.rotation * Vector3.forward;
+        Vector3 right = transform.rotation * Vector3.right;
+        Vector3 up = transform.rotation * Vector3.up;
+
+        Vector3 desiredPosition = leader.position
+            + forward * currentData.cameraPositonOffset.z
+            + right * currentData.cameraPositonOffset.x
+            + up * currentData.cameraPositonOffset.y;
+
+        desiredPosition = AvoidWallCollision(leader, desiredPosition);
+
+
+        Vector3 position = Vector3.Lerp(transform.position, desiredPosition,
+            Time.deltaTime * currentData.cameraSpeed);
+        transform.position = position;
 
     }
 
@@ -207,7 +195,7 @@ public class ThirdPersonCameraScript : MonoBehaviour
         if (Physics.SphereCast(leader.position, 0.2f, direction, out hit, maxDistance * 1.5f))
         // if (Physics.Linecast(leader.position, desiredPosition + padding,  out hit) && hit.collider.gameObject.layer != LayerMask.NameToLayer("Player"))
         {
-            Debug.Log("Camera Hitting: " + hit.collider.gameObject);
+            //Debug.Log("Camera Hitting: " + hit.collider.gameObject);
 
             Vector3 forward = transform.rotation * Vector3.forward;
             Vector3 right = transform.rotation * Vector3.right;

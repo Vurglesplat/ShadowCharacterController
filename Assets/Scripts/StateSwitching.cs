@@ -151,7 +151,7 @@ public class StateSwitching : MonoBehaviour
             shadowMovement.enabled = true;
             standardMovement.enabled = false;
 
-            standardModel.SetActive(false);
+            //standardModel.SetActive(false);
             shadowModel.SetActive(true);
 
             standardCollider.SetActive(false);
