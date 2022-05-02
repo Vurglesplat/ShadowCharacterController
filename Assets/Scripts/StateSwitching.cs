@@ -124,7 +124,7 @@ public class StateSwitching : MonoBehaviour
         }
         else
         {
-            Debug.Log("Is going to standard form");
+            //Debug.Log("Is going to standard form");
 
             currentShadowAmount -= Time.deltaTime / timeToSwitchToShadow;
 
